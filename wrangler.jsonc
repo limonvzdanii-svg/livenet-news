@@ -5,19 +5,14 @@
   "compatibility_date": "2026-08-20",
 
   "assets": {
-    "directory": "./public",
-    "binding": "ASSETS"
+    "directory": "."
   },
 
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "livenet-news",
-      "database_id": "PASTE_YOUR_D1_DATABASE_ID_HERE"
+      "database_id": "ТВОЙ-D1-DATABASE-ID"
     }
-  ],
-
-  "observability": {
-    "enabled": true
-  }
+  ]
 }
