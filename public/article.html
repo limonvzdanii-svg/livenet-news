@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>LiveNet News</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+
+
+<body>
+
+<header class="header">
+
+    <a href="/" class="brand">
+        <span class="brand-live">LIVE</span><span class="brand-net">NET</span>
+        <span class="brand-news">NEWS</span>
+    </a>
+
+    <nav class="navigation">
+
+        <a href="/">
+            Главная
+        </a>
+
+        <a href="/admin.html">
+            Админка
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main id="article-container">
+
+    <div class="loading">
+        Загружаем новость...
+    </div>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="footer-logo">
+        <span>LIVE</span><b>NET</b>
+    </div>
+
+    <div>
+        LiveNet News © 2026
+    </div>
+
+</footer>
+
+
+<script>
+
+async function loadArticle() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const id =
+        params.get("id");
+
+
+    if (!id) {
+
+        showError(
+            "Новость не указана."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/news/${encodeURIComponent(id)}`
+            );
+
+
+        if (!response.ok) {
+
+            showError(
+                "Новость не найдена."
+            );
+
+            return;
+        }
+
+
+        const article =
+            await response.json();
+
+
+        document.title =
+            `${article.title} — LiveNet News`;
+
+
+        const image =
+            article.image
+                ? `
+                    <img
+                        class="article-image"
+                        src="${escapeHtml(article.image)}"
+                        alt=""
+                    >
+                `
+                : "";
+
+
+        const date =
+            new Date(
+                article.created_at
+            ).toLocaleDateString(
+                "ru-RU",
+                {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+
+
+        document.getElementById(
+            "article-container"
+        ).innerHTML = `
+
+            <article class="article">
+
+                <a
+                    href="/"
+                    class="back-link"
+                >
+                    ← Все новости
+                </a>
+
+
+                <div class="article-label">
+                    LIVENET NEWS
+                </div>
+
+
+                <h1 class="article-title">
+                    ${escapeHtml(article.title)}
+                </h1>
+
+
+                <div class="article-meta">
+
+                    ${date}
+
+                    <span>•</span>
+
+                    ${escapeHtml(
+                        article.author || "LiveNet"
+                    )}
+
+                </div>
+
+
+                ${image}
+
+
+                ${
+                    article.excerpt
+                        ? `
+                            <p class="article-excerpt">
+                                ${escapeHtml(
+                                    article.excerpt
+                                )}
+                            </p>
+                        `
+                        : ""
+                }
+
+
+                <div class="article-content">
+
+                    ${escapeHtml(
+                        article.content
+                    )}
+
+                </div>
+
+
+                <div class="article-bottom">
+
+                    <a
+                        href="/"
+                        class="hero-button"
+                    >
+                        ← Вернуться к новостям
+                    </a>
+
+                </div>
+
+            </article>
+
+        `;
+
+    } catch (error) {
+
+        showError(
+            "Не удалось загрузить новость."
+        );
+
+    }
+}
+
+
+function showError(message) {
+
+    document.getElementById(
+        "article-container"
+    ).innerHTML = `
+
+        <div class="article-error">
+
+            <h1>
+                ${escapeHtml(message)}
+            </h1>
+
+            <a
+                href="/"
+                class="hero-button"
+            >
+                ← На главную
+            </a>
+
+        </div>
+
+    `;
+}
+
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+loadArticle();
+
+</script>
+
+</body>
+</html>
