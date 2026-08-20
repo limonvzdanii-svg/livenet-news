@@ -1,18 +1,7 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "livenet-news",
-  "main": "worker.js",
-  "compatibility_date": "2026-08-20",
-
-  "assets": {
-    "directory": "."
-  },
-
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "livenet-news",
-      "database_id": "ТВОЙ-D1-DATABASE-ID"
-    }
-  ]
-}
+"d1_databases": [
+  {
+    "binding": "DB",
+    "database_name": "livenet-news",
+    "database_id": "1ba658a7-21ad-49d5-a25c-d2cc5ecda15d"
+  }
+]
