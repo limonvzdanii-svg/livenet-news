@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>LiveNet News — Админка</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+
+<body>
+
+<header class="header">
+
+    <a href="/" class="brand">
+        <span class="brand-live">LIVE</span><span class="brand-net">NET</span>
+        <span class="brand-news">ADMIN</span>
+    </a>
+
+    <nav class="navigation">
+        <a href="/">Сайт</a>
+    </nav>
+
+</header>
+
+
+<main class="admin-page">
+
+    <div class="admin-header">
+
+        <div>
+            <div class="section-label">
+                LIVENET NEWS
+            </div>
+
+            <h1>
+                Панель администратора
+            </h1>
+        </div>
+
+    </div>
+
+
+    <!-- LOGIN -->
+
+    <section id="login-box" class="admin-card">
+
+        <h2>
+            Вход
+        </h2>
+
+        <p class="admin-description">
+            Введите пароль администратора.
+        </p>
+
+        <input
+            id="admin-password"
+            class="admin-input"
+            type="password"
+            placeholder="Пароль"
+        >
+
+        <button
+            class="primary-button"
+            onclick="login()"
+        >
+            Войти
+        </button>
+
+        <div id="login-error" class="error-message"></div>
+
+    </section>
+
+
+    <!-- ADMIN PANEL -->
+
+    <section
+        id="admin-panel"
+        class="admin-panel"
+        style="display:none;"
+    >
+
+        <div class="admin-card">
+
+            <div class="form-header">
+
+                <div>
+                    <div class="section-label">
+                        НОВОСТЬ
+                    </div>
+
+                    <h2 id="form-title">
+                        Создать новость
+                    </h2>
+                </div>
+
+            </div>
+
+
+            <input
+                id="news-title"
+                class="admin-input"
+                type="text"
+                placeholder="Заголовок новости"
+            >
+
+
+            <input
+                id="news-excerpt"
+                class="admin-input"
+                type="text"
+                placeholder="Краткое описание"
+            >
+
+
+            <input
+                id="news-image"
+                class="admin-input"
+                type="url"
+                placeholder="URL изображения (необязательно)"
+            >
+
+
+            <input
+                id="news-author"
+                class="admin-input"
+                type="text"
+                value="LiveNet"
+                placeholder="Автор"
+            >
+
+
+            <textarea
+                id="news-content"
+                class="admin-textarea"
+                placeholder="Полный текст новости"
+            ></textarea>
+
+
+            <div class="form-buttons">
+
+                <button
+                    class="primary-button"
+                    onclick="saveNews()"
+                >
+                    Опубликовать
+                </button>
+
+                <button
+                    id="cancel-edit"
+                    class="secondary-button"
+                    onclick="cancelEdit()"
+                    style="display:none;"
+                >
+                    Отмена
+                </button>
+
+            </div>
+
+
+            <div id="form-message"></div>
+
+        </div>
+
+
+        <!-- NEWS LIST -->
+
+        <div class="admin-card">
+
+            <div class="form-header">
+
+                <div>
+                    <div class="section-label">
+                        DATABASE
+                    </div>
+
+                    <h2>
+                        Новости
+                    </h2>
+                </div>
+
+                <button
+                    class="secondary-button"
+                    onclick="loadAdminNews()"
+                >
+                    ↻ Обновить
+                </button>
+
+            </div>
+
+
+            <div id="admin-news-list">
+
+                <div class="loading">
+                    Загружаем...
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="footer-logo">
+        <span>LIVE</span><b>NET</b>
+    </div>
+
+    <div>
+        LiveNet News © 2026
+    </div>
+
+</footer>
+
+
+<script>
+
+let adminPassword = "";
+let editingId = null;
+
+
+/* =========================
+   LOGIN
+========================= */
+
+function login() {
+
+    const password =
+        document.getElementById("admin-password").value.trim();
+
+    if (!password) {
+
+        showLoginError("Введите пароль.");
+
+        return;
+    }
+
+    adminPassword = password;
+
+    document.getElementById("login-box")
+        .style.display = "none";
+
+    document.getElementById("admin-panel")
+        .style.display = "block";
+
+    loadAdminNews();
+}
+
+
+/* =========================
+   LOAD NEWS
+========================= */
+
+async function loadAdminNews() {
+
+    const container =
+        document.getElementById("admin-news-list");
+
+    container.innerHTML =
+        '<div class="loading">Загружаем...</div>';
+
+    try {
+
+        const response =
+            await fetch("/api/news");
+
+        if (!response.ok) {
+            throw new Error("Не удалось загрузить новости");
+        }
+
+        const news =
+            await response.json();
+
+        if (!news.length) {
+
+            container.innerHTML = `
+                <div class="empty">
+                    Новостей пока нет.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        container.innerHTML =
+            news.map(article => {
+
+                const date =
+                    formatDate(article.created_at);
+
+                return `
+
+                    <div class="admin-news-item">
+
+                        <div class="admin-news-info">
+
+                            <div class="admin-news-title">
+                                ${escapeHtml(article.title)}
+                            </div>
+
+                            <div class="admin-news-meta">
+                                ${date}
+                                •
+                                ${escapeHtml(
+                                    article.author || "LiveNet"
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <div class="admin-news-actions">
+
+                            <button
+                                class="small-button edit-button"
+                                onclick="editNews(${article.id})"
+                            >
+                                Изменить
+                            </button>
+
+                            <button
+                                class="small-button delete-button"
+                                onclick="deleteNews(${article.id})"
+                            >
+                                Удалить
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        container.innerHTML = `
+            <div class="error-message">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+
+    }
+}
+
+
+/* =========================
+   CREATE / UPDATE
+========================= */
+
+async function saveNews() {
+
+    const title =
+        document.getElementById("news-title")
+            .value.trim();
+
+    const excerpt =
+        document.getElementById("news-excerpt")
+            .value.trim();
+
+    const image =
+        document.getElementById("news-image")
+            .value.trim();
+
+    const author =
+        document.getElementById("news-author")
+            .value.trim() || "LiveNet";
+
+    const content =
+        document.getElementById("news-content")
+            .value.trim();
+
+
+    if (!title) {
+
+        showFormMessage(
+            "Введите заголовок.",
+            true
+        );
+
+        return;
+    }
+
+
+    if (!content) {
+
+        showFormMessage(
+            "Введите текст новости.",
+            true
+        );
+
+        return;
+    }
+
+
+    const data = {
+        title,
+        excerpt,
+        image,
+        author,
+        content
+    };
+
+
+    try {
+
+        let response;
+
+
+        if (editingId) {
+
+            response =
+                await fetch(
+                    `/api/news/${editingId}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "X-Admin-Password":
+                                adminPassword
+                        },
+
+                        body:
+                            JSON.stringify(data)
+                    }
+                );
+
+        } else {
+
+            response =
+                await fetch(
+                    "/api/news",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "X-Admin-Password":
+                                adminPassword
+                        },
+
+                        body:
+                            JSON.stringify(data)
+                    }
+                );
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            showFormMessage(
+                result.error || "Произошла ошибка.",
+                true
+            );
+
+            return;
+        }
+
+
+        showFormMessage(
+            editingId
+                ? "Новость изменена!"
+                : "Новость опубликована!",
+            false
+        );
+
+
+        clearForm();
+
+        await loadAdminNews();
+
+    } catch (error) {
+
+        showFormMessage(
+            error.message,
+            true
+        );
+
+    }
+}
+
+
+/* =========================
+   EDIT
+========================= */
+
+async function editNews(id) {
+
+    try {
+
+        const response =
+            await fetch(`/api/news/${id}`);
+
+        if (!response.ok) {
+            throw new Error("Новость не найдена");
+        }
+
+        const article =
+            await response.json();
+
+
+        editingId = id;
+
+
+        document.getElementById("news-title")
+            .value = article.title || "";
+
+        document.getElementById("news-excerpt")
+            .value = article.excerpt || "";
+
+        document.getElementById("news-image")
+            .value = article.image || "";
+
+        document.getElementById("news-author")
+            .value = article.author || "LiveNet";
+
+        document.getElementById("news-content")
+            .value = article.content || "";
+
+
+        document.getElementById("form-title")
+            .textContent = "Изменить новость";
+
+
+        document.querySelector(
+            "#admin-panel .primary-button"
+        ).textContent = "Сохранить изменения";
+
+
+        document.getElementById("cancel-edit")
+            .style.display = "inline-block";
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+async function deleteNews(id) {
+
+    if (
+        !confirm(
+            "Вы действительно хотите удалить эту новость?"
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/news/${id}`,
+                {
+                    method: "DELETE",
+
+                    headers: {
+                        "X-Admin-Password":
+                            adminPassword
+                    }
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            alert(
+                result.error ||
+                "Не удалось удалить новость."
+            );
+
+            return;
+        }
+
+
+        await loadAdminNews();
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
+}
+
+
+/* =========================
+   CANCEL EDIT
+========================= */
+
+function cancelEdit() {
+
+    editingId = null;
+
+    clearForm();
+
+    document.getElementById("form-title")
+        .textContent = "Создать новость";
+
+    document.querySelector(
+        "#admin-panel .primary-button"
+    ).textContent = "Опубликовать";
+
+    document.getElementById("cancel-edit")
+        .style.display = "none";
+}
+
+
+/* =========================
+   CLEAR
+========================= */
+
+function clearForm() {
+
+    document.getElementById("news-title")
+        .value = "";
+
+    document.getElementById("news-excerpt")
+        .value = "";
+
+    document.getElementById("news-image")
+        .value = "";
+
+    document.getElementById("news-author")
+        .value = "LiveNet";
+
+    document.getElementById("news-content")
+        .value = "";
+
+    editingId = null;
+}
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function showLoginError(message) {
+
+    document.getElementById("login-error")
+        .textContent = message;
+}
+
+
+function showFormMessage(message, error) {
+
+    const element =
+        document.getElementById("form-message");
+
+    element.textContent = message;
+
+    element.className =
+        error
+            ? "error-message"
+            : "success-message";
+}
+
+
+function formatDate(date) {
+
+    return new Date(date)
+        .toLocaleDateString(
+            "ru-RU",
+            {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            }
+        );
+}
+
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+</script>
+
+</body>
+</html>
