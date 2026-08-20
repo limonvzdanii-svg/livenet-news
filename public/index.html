@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LiveNet News</title>
+
+    <meta
+        name="description"
+        content="LiveNet News — последние новости и события"
+    >
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<header class="header">
+
+    <a href="/" class="brand">
+        <span class="brand-live">LIVE</span><span class="brand-net">NET</span>
+        <span class="brand-news">NEWS</span>
+    </a>
+
+    <nav class="navigation">
+        <a href="/" class="active">Главная</a>
+        <a href="/admin.html">Админка</a>
+    </nav>
+
+</header>
+
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-label">
+            LIVENET NEWS
+        </div>
+
+        <h1>
+            Новости.<br>
+            Без лишнего.
+        </h1>
+
+        <p>
+            Последние события, важные новости
+            и интересные истории от LiveNet.
+        </p>
+
+        <a href="#news" class="hero-button">
+            Читать новости →
+        </a>
+
+    </div>
+
+</section>
+
+
+<main class="main">
+
+    <section id="news">
+
+        <div class="section-top">
+
+            <div>
+                <div class="section-label">
+                    LIVENET
+                </div>
+
+                <h2>
+                    Последние новости
+                </h2>
+            </div>
+
+            <button
+                class="refresh-button"
+                onclick="loadNews()"
+            >
+                ↻ Обновить
+            </button>
+
+        </div>
+
+
+        <div id="news-container" class="news-grid">
+
+            <div class="loading">
+                Загружаем новости...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="footer-logo">
+        <span>LIVE</span><b>NET</b>
+    </div>
+
+    <div>
+        LiveNet News © 2026
+    </div>
+
+</footer>
+
+
+<script src="/app.js"></script>
+
+</body>
+</html>
